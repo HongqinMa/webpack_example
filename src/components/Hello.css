@@ -6,5 +6,6 @@ img{
       height: 200px;
       width: 200px;
       background-image: url("../images/mv.png");
+      -moz-background-image: url("../images/mv.png");
       background-size: cover;
   }
