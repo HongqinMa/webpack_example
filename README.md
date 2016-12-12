@@ -91,16 +91,18 @@ src 中的开发文件，dist 是打包后的文件
   $ git commit -m "项目目录结构及 webpack 初步配置"
 ```
 
+---
+
 ## webpack 启动过程演进
 
 把运行命令配置到 npm 的 script 中。  package.json
 
 ``` js
-"scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "develop": "webpack --config webpack.develop.config.js",
-    "publish": "webpack --config webpack.publish.config.js"
-}
+  "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "develop": "webpack --config webpack.develop.config.js",
+      "publish": "webpack --config webpack.publish.config.js"
+  }
 ```
 
 执行 ：
@@ -199,8 +201,205 @@ src 中的开发文件，dist 是打包后的文件
 
 修改了配置文件，重新启动，执行 `npm run develop` 结果如下图：
 
-![浏览器打开结果](t13-webpack项目构建工具/webpack006.png)
+![终端执行结果](t13-webpack项目构建工具/webpack006.png)
 
 此时的目录结构如下图：
 
 ![目录结构变化](t13-webpack项目构建工具/webpack007.png)
+
+---
+
+## 常用加载器
+
+Loader：这是webpack准备的一些预处理工具
+
+在构建项目之前做一些预处理操作，比如 ES6 转 ES5，Sass、Less
+
+### 编译 JSX 和 ES6 到 ES5 语法的加载器
+
+安装：
+
+``` bash
+  $ npm install babel-loader --save-dev
+  $ npm install babel-core babel-preset-es2015 babel-preset-react --save-dev
+```
+
+babel-loader: 转换器，编译 JSX 语法和 ES6 语法到 ES5 语法。
+
+修改开发配置环境: webpack.develop.config.js
+
+``` js
+    module: {
+        loaders: [
+            {
+                test: /\.jsx?$/, // 用正则来匹配文件路径，这段意思是匹配 js 或者 jsx
+                loader: 'babel', // 加载模块 "babel" 是 "babel-loader" 的缩写
+                query: {
+                    presets: ['es2015', 'react']
+                }
+            }
+        ]
+    }
+```
+
+一个 React Hello, World! app.js 文件
+
+```
+    // 项目入口文件
+    import React, {Component} from 'react';
+    import ReactDOM from 'react-dom';
+    ReactDOM.render(
+        <div>
+            Hello World!
+        </div>,
+        document.getElementById('app')
+    );
+```
+
+### 加载 CSS 
+
+webpack 允许像加载任何代码一样加载 CSS。可以选择需要的方式，但是可以为每个组件把所有的 CSS 加载到入口主文件中来做任何事情。
+
+加载 CSS 需要 css-loader 和 style-loader，他们做两件不同的事情:
+
+> css-loader 会遍历 CSS 文件，然后找到 url() 表达式然后处理他们
+> style-loader 会把原来的 CSS 代码插入页面中的一个 style 标签中
+
+#### 安装
+
+``` bash
+  $ npm install css-loader style-loader --save-dev
+```
+
+新建文件夹：components
+
+新增：_base.css Hello.css Hello.js  Hello.sass 文件
+
+#### 修改配置文件：
+
+``` js
+  // 可以在 js 中引用 css 的加载器
+  {
+      test: /\.css$/,
+      loader: 'style!css' // 如果同时使用多个加载器，中间用 ! 连接，加载器的执行顺序是从右向左
+  }
+```
+
+！用来定义loader的串联关系，"-loader"是可以省略不写的，多个loader之间用“!”连接起来
+
+#### Css加载策略
+
+1、在主入口文件中，比如 src/app.js 你可以为整个项目加载所有的 CSS
+
+``` js
+  import  './project-styles.css';
+```
+
+> CSS 就完全包含在合并的应用中，再也不需要重新下载。
+
+2、懒加载（推荐）
+
+如果想发挥应用中多重入口文件的优势，可以在每个入口点包含各自的 CSS。
+
+> 把模块用文件夹分离，每个文件夹有各自的 CSS 和 JavaScript 文件。
+> 再次，当应用发布的时候，导入的 CSS 已经加载到每个入口文件中。
+
+3、定制组件css
+
+可以根据这个策略为每个组件创建 CSS 文件，可以让组件名和 CSS 中的 class 使用一个命名空间，来避免一个组件中的一些 class 干扰到另外一些组件的 class。如下图：
+
+![定制组件css](t13-webpack项目构建工具/webpack008.png)
+
+4、使用内联样式取代 CSS 文件
+
+在 “React Native” 中不再需要使用任何 CSS 文件，只需要使用 style 属性，可以把你的 CSS 定义成一个对象，那样就可以根据项目重新来考略你的 CSS 策略。
+
+![使用内联样式取代 CSS 文件](t13-webpack项目构建工具/webpack009.png)
+
+### 加载sass
+
+下载依赖
+
+``` dash
+  $ npm install sass-loader -save-dev
+```
+
+修改配置文件
+
+``` js
+  // 可以在 js 中引用 sass 的加载器
+  {
+      test: /\.scss$/,
+      loader: 'style!css!sass'
+  }
+```
+
+安装sass-loader之后运行运行 `npm run develop` 时报错如下：
+
+![安装sass-loader之后运行报错](t13-webpack项目构建工具/webpack010.png)
+
+解决：
+
+``` bash
+  $ npm install node-sass -save-dev
+```
+
+### 图片处理
+
+> 直到 HTTP/2 才能在应用加载的时候避免设置太多 HTTP 请求。
+> 根据浏览器不同必须设置并行请求数，如果在 CSS 中加载了太多图片的话，可以自动把这些图片转成 BASE64 字符串然后内联到 CSS 里来降低必要的请求数，这个方法取决于图片大小。
+> 需要为应用平衡下载的大小和下载的数量，不过 Webpack 可以让这个平衡十分轻松适应。
+
+下载载依赖
+
+``` bassh
+  $ npm install url-loader  file-loader --save-dev
+```
+
+修改配置文件:
+
+``` js
+  {
+      test: /\.(png|jpg|gif|jpeg)$/,
+      loader: 'url?limit=25000'
+  }, 
+  // 处理字体
+  {
+      test: /\.(eot|woff|ttf|woff2|svg)$/,
+      loader: 'url?limit=25000'
+  }
+```
+
+> 加载器会把需要转换的路径变成 BASE64 字符串，在其他的 webpack 书中提到的这方面会把 CSS 中的 “url()” 像其他 require 或者 import 来处理。
+> 意味着如果我们可以通过它来处理我们的图片文件。
+> url-loader 传入的 limit 参数是告诉它图片如果不大于 25KB 的话要自动在它从属的 css 文件中转成 BASE64 字符串。
+
+大图片处理
+
+在代码中是一下情况：
+
+```  css
+  div.img {
+      background: url(../image/xxx.jpg)
+  }
+  //或者
+  var img = document.createElement("img");
+  img.src = require("../image/xxx.jpg");
+  document.body.appendChild(img);
+```
+
+``` js
+  // 可以这样配置
+  module: {
+      {
+        test: /\.(png|jpg)$/,
+        loader: 'url-loader?limit=10000&name=build/[name].[ext]'
+      }]
+  }
+```
+
+针对上面的两种使用方式，loader 可以自动识别并处理。根据 loader 中的设置，webpack 会将小于指点大小的文件转化成 base64 格式的 dataUrl，其他图片会做适当的压缩并存放在指定目录中。
+
+这一步的目录如下：
+
+![目录结构](t13-webpack项目构建工具/webpack011.png)

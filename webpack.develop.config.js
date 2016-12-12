@@ -15,5 +15,37 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'bundle.js'
+    },
+    module: {
+        loaders: [
+            // JXS 和 ES6 语法转换为 ES5
+            {
+                test: /\.jsx?$/, // 用正则来匹配文件路径，这段意思是匹配 js 或者 jsx
+                loader: 'babel', // 加载模块 "babel" 是 "babel-loader" 的缩写
+                query: {
+                    presets: ['es2015', 'react']
+                }
+            },
+            // 可以在 js 中引用 css 的加载器
+            {
+                test: /\.css$/,
+                loader: 'style!css' // 如果同时使用多个加载器，中间用 ! 连接，加载器的执行顺序是从右向左
+            },
+            // 可以在 js 中引用 sass 的加载器
+            {
+                test: /\.scss$/,
+                loader: 'style!css!sass'
+            },
+            // 处理图片
+            {
+                test: /\.(png|jpg|gif|jpeg)$/,
+                loader: 'url?limit=25000'
+            },
+            // 处理字体
+            {
+                test: /\.(eot|woff|ttf|woff2|svg)$/,
+                loader: 'url?limit=1000000'
+            }
+        ]
     }
 };
