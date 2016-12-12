@@ -5,7 +5,12 @@ var path = require('path');
 
 module.exports = {
     // 单页面 SPA 的入口文件
-    entry:path.resolve(__dirname,'src/js/app.js'),
+    entry:[
+        // 实现浏览器自动刷新
+        'webpack/hot/dev-server',
+        'webpack-dev-server/client?http://localhost:8080',
+        path.resolve(__dirname,'src/js/app.js')
+    ],
     // 构建之后的文件输出位置配置
     output: {
         path: path.resolve(__dirname, 'dist'),

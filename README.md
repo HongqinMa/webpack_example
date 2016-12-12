@@ -90,3 +90,117 @@ src 中的开发文件，dist 是打包后的文件
   $ git add -A
   $ git commit -m "项目目录结构及 webpack 初步配置"
 ```
+
+## webpack 启动过程演进
+
+把运行命令配置到 npm 的 script 中。  package.json
+
+``` js
+"scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "develop": "webpack --config webpack.develop.config.js",
+    "publish": "webpack --config webpack.publish.config.js"
+}
+```
+
+执行 ：
+
+``` bash
+  $ npm run develop
+```
+
+### 更好的方式实现动启动
+
+如果需要一直输入 npm run develop 确实是一件非常无聊的事情，我们可以把让他安静的运行，让我们设置 webpack-dev-server
+
+除了提供模块打包功能，Webpack 还提供了一个基于 Node.js Express 框架的开发服务器，它是一个静态资源 Web 服务器，对于简单静态页面或者仅依赖于独立服务的前端页面，都可以直接使用这个开发服务器进行开 发。在开发过程中，开发服务器会监听每一个文件的变化，进行实时打包，并且可以推送通知前端页面代码发生了变化，从而可以实现页面的自动刷新。
+
+更好的方式实现自动启动：webpack 官方提供的一个第三个的插件，自动监听代码变化，帮我们重新构建，把 webpack 和 express 封装了
+
+``` bash
+  $ npm install webpack-dev-server -save-dev
+```
+
+调整 npm 的 package.json scripts 部分中开发命令的配置
+
+``` js
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "develop": "webpack-dev-server --config webpack.develop.config.js --devtool eval --progress --colors --hot --content-base src",
+    "publish": "webpack --config webpack.publish.config.js"
+  }
+```
+
+> webpack-dev-server - 在 localhost:8080 建立一个 Web 服务器
+> --devtool eval - 为你的代码创建源地址。当有任何报错的时候可以让你更加精确地定位到文件和行号
+> --progress - 显示合并代码进度
+> --colors -- hot，命令行中显示颜色！
+> --content-base  指向设置的输出目录//这点一定是我们的发布目录
+
+在 src 下面，新建一个 index.html 文件，
+
+``` html
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <title>webpack 使用</title>
+  </head>
+  <body>
+      <div id="app"></div>
+  </body>
+  <script src="bundle.js"></script>
+  </html>
+```
+
+执行`npm run develop` ，结果如下图：
+
+![执行 npm run develop](t13-webpack项目构建工具/webpack004.png)
+
+执行 `npm run develop` 之后我们发现执行没有结束，启动着监听，并在 8080 端口开启了一个服务器。
+
+在浏览器中打开结果如下：
+
+![浏览器打开结果](t13-webpack项目构建工具/webpack005.png)
+
+如果修改了 app.js 文件，会自动执行构建，刷新浏览器会发生变化。
+
+**在 index.html 访问的时候，会访问  bundle.js 文件，为什么，因为 webpack-dev-server 生成的 bundle 在内存中，放到内存中构建快**
+
+总的来说，当你运行 npm run develop 的时候，会启动一个 Web 服务器，然后监听文件修改，然后自动重新合并你的代码。真的非常简洁！
+
+注意:
+
+> 用 webpack-dev-server 生成 bundle.js 文件是在内存中的，并没有实际生成
+> 如果引用的文件夹中已经有 bundle.js 就不会自动刷新了，你需要先把 bundle.js 文件手动删除
+> 用 webstorm 需要注意，因为他是自动保存的，所以可能识别的比较慢，你需要手动的 ctrl+s 一下
+
+### 浏览器自动刷新
+
+修改 webpack.develop.config.js 的入口文件配置，修改 entry 部分如下：
+
+``` js
+    var path = require('path');
+    module.exports = {
+        // 单页面 SPA 的入口文件
+        entry:[
+            // 实现浏览器自动刷新
+            'webpack/hot/dev-server',
+            'webpack-dev-server/client?http://localhost:8080',
+            path.resolve(__dirname,'src/js/app.js')
+        ],
+        // 构建之后的文件输出位置配置
+        output: {
+            path: path.resolve(__dirname, 'dist'),
+            filename: 'bundle.js'
+        }
+    };
+```
+
+修改了配置文件，重新启动，执行 `npm run develop` 结果如下图：
+
+![浏览器打开结果](t13-webpack项目构建工具/webpack006.png)
+
+此时的目录结构如下图：
+
+![目录结构变化](t13-webpack项目构建工具/webpack007.png)
