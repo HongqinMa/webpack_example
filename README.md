@@ -1039,7 +1039,7 @@ module.noParse 是 webpack 的另一个很有用的配置项，如果确定一�
 
 http://fakefish.github.io/react-webpack-cookbook/Multiple-entry-points.html
 
-![多文件入口](t13-webpack项目构建工具/webpack014.png)
+![多文件入口](t13-webpack项目构建工具/webpack015.png)
 
 ### 强制从新加载文件
 

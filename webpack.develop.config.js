@@ -30,7 +30,7 @@ module.exports = {
                 test: /\.jsx?$/, // 用正则来匹配文件路径，这段意思是匹配 js 或者 jsx
                 loader: 'babel', // 加载模块 "babel" 是 "babel-loader" 的缩写
                 query: {
-                    presets: ['es2015', 'react']
+                    presets: ['es2015', 'react', 'state-0', 'state-1', 'state-2', 'state-3']
                 }
             },
             // 可以在 js 中引用 css 的加载器
@@ -72,9 +72,9 @@ module.exports = {
     // 配置了这个属性之后 react 和 react-dom 这些第三方的包都不会被构建进 js 中，那么我们就需要通过 cdn 进行文件的引用了
     // 前边的这个名称是在项目中引用用的，相当于 import React from 'react1' 中的 react
     externals: {
-        'react1': 'react',
-        'react-dom1': 'react-dom',
-        '$1': 'jQuery'
+        // 'react1': 'react',
+        // 'react-dom1': 'react-dom',
+        // '$1': 'jQuery'
     },
     plugins: [
         new OpenBrowserPlugin({url: 'http://localhost:8080/', browser: 'chrome'})
