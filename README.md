@@ -1,3 +1,4 @@
+
 CommonJS 和 AMD 是用于 JavaScript 模块管理的两大规范，前者定义的是模块的同步加载，主要用于 NodeJS ；而后者则是异步加载，通过 RequireJS 等工具适用于前端。随着 npm 成为主流的 JavaScript 组件发布平台，越来越多的前端项目也依赖于 npm 上的项目，或者自身就会发布到 npm 平台。因此，让前端项目更方便的使用 npm 上的资源成为一大需求。
 
 web 开发中常用到的静态资源主要有 JavaScript、CSS、图片、Jade 等文件，webpack 中将静态资源文件称之为模块。 webpack 是一个 module bundler (模块打包工具)，其可以兼容多种 js 书写规范，且可以处理模块间的依赖关系，具有更强大的 js 模块化的功能。Webpack 对它们进行统一的管理以及打包发布，其官方主页用下面这张图来说明 Webpack 的作用.
@@ -45,6 +46,76 @@ webpack 更 Gulp 的作用相同，是项目构建工具。
 ![项目结构目录](t13-webpack项目构建工具/webpack002.png)
 
 src 中的开发文件，dist 是打包后的文件
+
+### app.js 文件
+
+```
+  // 项目入口文件
+  import React, {Component} from 'react';
+  import ReactDOM from 'react-dom';
+  import Hello from '../components/Hello.js';
+  ReactDOM.render(
+      <div>
+          <Hello/>
+      </div>,
+      document.getElementById('app')
+  );
+```
+
+### components/Hello.js
+
+``` 
+  import './Hello.css';
+  import './Hello.scss';
+  import React, {Component} from 'react';
+  // 直接在js中定义样式，内嵌样式
+  let style = {
+      backgroundColor: 'blue'
+  };
+  export default class Hello extends Component {
+      render() {
+          return (
+              <div>
+                  {/*内嵌样式的写法*/}
+                  <h1 style={style} onClick={()=>this.myClick("fdfdf",23)}>使用样式演示</h1>
+                  <br/>
+                  <img/>
+              </div>
+          )
+      }
+  }
+```
+
+### components/_base.scss
+
+```sass
+// 新定义了一个变量
+$fontSize: 100px;
+```
+
+### components/Hello.css
+
+``` css
+  h1 {
+      color: red;
+  }
+  img{
+      height: 200px;
+      width: 200px;
+      background-image: url("../images/mv.png");
+      -moz-background-image: url("../images/mv.png");
+      background-size: cover;
+  }
+```
+
+### components/Hello.scss
+
+``` sass
+  @import "base";
+  h1{ // 利用静默注释描述一个样式 这种注释内容不会出现在生成的css文件中
+    font-size: $fontSize; /* _base.sass是部分文件，不会生成单独的css 这种注释内容会出现在生成的css文件中 */
+  }
+```
 
 ### 安装
 
@@ -404,61 +475,6 @@ webpack 允许像加载任何代码一样加载 CSS。可以选择需要的方�
 
 ![目录结构](t13-webpack项目构建工具/webpack011.png)
 
-webpack.develop.config.js
-
-``` js
-  // webpack 的开发配置文件
-  // 编写配置文件，要有最基本的文件入口和输出文件配置信息等
-  // 里面还可以加loader和各种插件配置使用
-  var path = require('path');
-  module.exports = {
-      // 单页面 SPA 的入口文件
-      entry:[
-          // 实现浏览器自动刷新
-          'webpack/hot/dev-server',
-          'webpack-dev-server/client?http://localhost:8080',
-          path.resolve(__dirname,'src/js/app.js')
-      ],
-      // 构建之后的文件输出位置配置
-      output: {
-          path: path.resolve(__dirname, 'dist'),
-          filename: 'bundle.js'
-      },
-      module: {
-          loaders: [
-              // JXS 和 ES6 语法转换为 ES5
-              {
-                  test: /\.jsx?$/, // 用正则来匹配文件路径，这段意思是匹配 js 或者 jsx
-                  loader: 'babel', // 加载模块 "babel" 是 "babel-loader" 的缩写
-                  query: {
-                      presets: ['es2015', 'react']
-                  }
-              },
-              // 可以在 js 中引用 css 的加载器
-              {
-                  test: /\.css$/,
-                  loader: 'style!css' // 如果同时使用多个加载器，中间用 ! 连接，加载器的执行顺序是从右向左
-              },
-              // 可以在 js 中引用 sass 的加载器
-              {
-                  test: /\.scss$/,
-                  loader: 'style!css!sass'
-              },
-              // 处理图片
-              {
-                  test: /\.(png|jpg|gif|jpeg)$/,
-                  loader: 'url?limit=25000'
-              },
-              // 处理字体
-              {
-                  test: /\.(eot|woff|ttf|woff2|svg)$/,
-                  loader: 'url?limit=1000000'
-              }
-          ]
-      }
-  };
-```
-
 ### 最终的 webpack.develop.config.js 文件
 
 ```js
@@ -493,7 +509,7 @@ webpack.develop.config.js
                   test: /\.jsx?$/, // 用正则来匹配文件路径，这段意思是匹配 js 或者 jsx
                   loader: 'babel', // 加载模块 "babel" 是 "babel-loader" 的缩写
                   query: {
-                      presets: ['es2015', 'react']
+                      presets: ['es2015', 'react', 'stage-0', 'stage-1', 'stage-2', 'stage-3']
                   }
               },
               // 可以在 js 中引用 css 的加载器
@@ -535,9 +551,9 @@ webpack.develop.config.js
       // 配置了这个属性之后 react 和 react-dom 这些第三方的包都不会被构建进 js 中，那么我们就需要通过 cdn 进行文件的引用了
       // 前边的这个名称是在项目中引用用的，相当于 import React from 'react1' 中的 react
       externals: {
-          'react1': 'react',
-          'react-dom1': 'react-dom',
-          '$1': 'jQuery'
+          // 'react1': 'react',
+          // 'react-dom1': 'react-dom',
+          // '$1': 'jQuery'
       },
       plugins: [
           new OpenBrowserPlugin({url: 'http://localhost:8080/', browser: 'chrome'})
@@ -557,7 +573,7 @@ webpack.develop.config.js
 
 ### 分离应用和第三方
 
-何时应该分离
+何时应该分离？
 
 当应用依赖其他库尤其是像 React JS 这种大型库的时候，需要考虑把这些依赖分离出去，这样就能够让用户在更新应用之后不需要再次下载第三方文件。
 
@@ -812,7 +828,6 @@ copy-webpack-plugin
 
 https://github.com/mdreizin/webpack-config
 
-
 ### 最终的 webpack.publish.config.js 文件
 
 ``` js
@@ -845,7 +860,7 @@ https://github.com/mdreizin/webpack-config
                   test: /\.jsx?$/, // 用正则来匹配文件路径，这段意思是匹配 js 或者 jsx
                   loader: 'babel', // 加载模块 "babel" 是 "babel-loader" 的缩写
                   query: {
-                      presets: ['es2015', 'react']
+                      presets: ['es2015', 'react', 'stage-0', 'stage-1', 'stage-2', 'stage-3']
                   }
               },
               // 可以在 js 中引用 css 的加载器
@@ -949,20 +964,42 @@ https://github.com/mdreizin/webpack-config
 
 ``` js
   module.exports = {
-      "extends": "airbnb-base",
-      "parser": "babel-eslint",
+      // 开启推荐配置信息
+      // "extends": "eslint:recommended",
+      // 默认情况下，ESLint 会在所有父级目录里寻找配置文件，一直到根目录。如果你想要你所有项目都遵循一个特定的约定时，这将会很有用，但有时候会导致意想不到的结果。为了将 ESLint 限制到一个特定的项目，在你项目根目录下的 package.json 文件或者 .eslintrc.* 文件里的 eslintConfig 字段下设置 "root": true。ESLint 一旦发现配置文件中有 "root": true，它就会停止在父级目录中寻找。
+      "root": true,
+      // 脚本在执行期间访问的额外的全局变量
+      // 当访问未定义的变量时，no-undef 规则将发出警告。如果你想在一个文件里使用全局变量，推荐你定义这些全局变量，这样 ESLint 就不会发出警告了。你可以使用注释或在配置文件中定义全局变量。
       "globals" : {
           "window":true,
           "document":true,
           "$":true
       },
-      "plugins": [
-          'html'
-      ],
+      // 设置插件
+      // "plugins": [
+      //     'html'
+      // ],
+      // 设置解析器选项
+      "parserOptions": {
+          "ecmaVersion": 6,
+          "sourceType": "module",
+          "ecmaFeatures": {
+              "jsx": true
+          }
+      },
+      // 启用的规则及各自的错误级别
       "rules" : {
-          "global-require": 0,
-          "indent": [0, "tab"], // 去掉tab约定,IDE会有问题
-          "no-trailing-spaces": [0, { "skipBlankLines": true }]// 去掉行未得空格
+          // 禁止用console
+          "no-console":1,
+          // 禁止用分号
+          "semi":[1,'never'],
+          // 在同一个作用域中禁止多次重复定义
+          "no-redeclare":1
+      },
+      // 指定想启用的环境
+      "env": {
+          "browser": true,
+          "node": true
       }
   };
 ```
@@ -1069,3 +1106,46 @@ Node 和webpack 集成过程中遇到的坑如何解决：http://www.tuicool.com
 ### 热加载组件
 
 http://fakefish.github.io/react-webpack-cookbook/Hot-loading-components.html
+
+## 最后的 package.json
+
+``` json
+  {
+    "name": "webpack_example",
+    "version": "1.0.0",
+    "description": "CommonJS 和 AMD 是用于 JavaScript 模块管理的两大规范，前者定义的是模块的同步加载，主要用于 NodeJS ；而后者则是异步加载，通过 RequireJS 等工具适用于前端。随着 npm 成为主流的 JavaScript 组件发布平台，越来越多的前端项目也依赖于 npm 上的项目，或者自身就会发布到 npm 平台。因此，让前端项目更方便的使用 npm 上的资源成为一大需求。",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "develop": "webpack-dev-server --config webpack.develop.config.js --devtool eval --progress --colors --hot --content-base src",
+      "publish": "webpack --config webpack.publish.config.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+      "babel-core": "^6.20.0",
+      "babel-loader": "^6.2.9",
+      "babel-preset-es2015": "^6.18.0",
+      "babel-preset-react": "^6.16.0",
+      "css-loader": "^0.26.1",
+      "eslint": "^3.12.0",
+      "eslint-loader": "^1.6.1",
+      "extract-text-webpack-plugin": "^1.0.1",
+      "file-loader": "^0.9.0",
+      "gulp": "^3.9.1",
+      "html-webpack-plugin": "^2.24.1",
+      "node-sass": "^4.0.0",
+      "open-browser-webpack-plugin": "0.0.3",
+      "sass-loader": "^4.0.2",
+      "style-loader": "^0.13.1",
+      "url-loader": "^0.5.7",
+      "webpack": "^1.14.0",
+      "webpack-dev-server": "^1.16.2"
+    },
+    "dependencies": {
+      "react": "^15.4.1",
+      "react-dom": "^15.4.1"
+    }
+  }
+```
