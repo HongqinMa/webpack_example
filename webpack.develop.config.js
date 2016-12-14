@@ -30,7 +30,7 @@ module.exports = {
                 test: /\.jsx?$/, // 用正则来匹配文件路径，这段意思是匹配 js 或者 jsx
                 loader: 'babel', // 加载模块 "babel" 是 "babel-loader" 的缩写
                 query: {
-                    presets: ['es2015', 'react', 'state-0', 'state-1', 'state-2', 'state-3']
+                    presets: ['es2015', 'react','stage-0','stage-1','stage-2','stage-3']
                 }
             },
             // 可以在 js 中引用 css 的加载器
