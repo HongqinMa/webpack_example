@@ -15,7 +15,7 @@ module.exports = {
         app: path.resolve(__dirname,'src/js/app.js'),
         // 当 react 作为一个 node  模块安装的时候，
         // 可以直接指向它，就比如 require('react');
-        vendors: ['react', 'react-dom']
+        vendors: ['react', 'react-dom', 'react-router']
     },
     // 构建之后的文件输出位置配置
     output: {
