@@ -3,8 +3,6 @@ CommonJS 和 AMD 是用于 JavaScript 模块管理的两大规范，前者定义
 
 web 开发中常用到的静态资源主要有 JavaScript、CSS、图片、Jade 等文件，webpack 中将静态资源文件称之为模块。 webpack 是一个 module bundler (模块打包工具)，其可以兼容多种 js 书写规范，且可以处理模块间的依赖关系，具有更强大的 js 模块化的功能。Webpack 对它们进行统一的管理以及打包发布，其官方主页用下面这张图来说明 Webpack 的作用.
 
-![webpack的作用](t13-webpack项目构建工具/webpack001.png)
-
 ## webpack 介绍
 
 webpack 更 Gulp 的作用相同，是项目构建工具。
@@ -41,10 +39,6 @@ webpack 更 Gulp 的作用相同，是项目构建工具。
     $ npm init -y
 ```
 
-### 搭建基本的项目结构如下图：
-
-![项目结构目录](t13-webpack项目构建工具/webpack002.png)
-
 src 中的开发文件，dist 是打包后的文件
 
 ### 安装
@@ -80,8 +74,6 @@ src 中的开发文件，dist 是打包后的文件
 ``` bash
   $ webpack --config webpack.develop.config.js
 ```
-
-![运行完之后生成 bundle.js 文件](t13-webpack项目构建工具/webpack003.png)
 
 ### 进行版本控制
 
@@ -156,15 +148,7 @@ src 中的开发文件，dist 是打包后的文件
   </html>
 ```
 
-执行`npm run develop` ，结果如下图：
-
-![执行 npm run develop](t13-webpack项目构建工具/webpack004.png)
-
 执行 `npm run develop` 之后我们发现执行没有结束，启动着监听，并在 8080 端口开启了一个服务器。
-
-在浏览器中打开结果如下：
-
-![浏览器打开结果](t13-webpack项目构建工具/webpack005.png)
 
 如果修改了 app.js 文件，会自动执行构建，刷新浏览器会发生变化。
 
@@ -200,13 +184,7 @@ src 中的开发文件，dist 是打包后的文件
     };
 ```
 
-修改了配置文件，重新启动，执行 `npm run develop` 结果如下图：
-
-![终端执行结果](t13-webpack项目构建工具/webpack006.png)
-
-此时的目录结构如下图：
-
-![目录结构变化](t13-webpack项目构建工具/webpack007.png)
+修改了配置文件，重新启动，执行 `npm run develop` .
 
 ---
 
@@ -309,13 +287,9 @@ webpack 允许像加载任何代码一样加载 CSS。可以选择需要的方�
 
 可以根据这个策略为每个组件创建 CSS 文件，可以让组件名和 CSS 中的 class 使用一个命名空间，来避免一个组件中的一些 class 干扰到另外一些组件的 class。如下图：
 
-![定制组件css](t13-webpack项目构建工具/webpack008.png)
-
 4、使用内联样式取代 CSS 文件
 
 在 “React Native” 中不再需要使用任何 CSS 文件，只需要使用 style 属性，可以把你的 CSS 定义成一个对象，那样就可以根据项目重新来考略你的 CSS 策略。
-
-![使用内联样式取代 CSS 文件](t13-webpack项目构建工具/webpack009.png)
 
 ### 加载sass
 
@@ -335,9 +309,7 @@ webpack 允许像加载任何代码一样加载 CSS。可以选择需要的方�
   }
 ```
 
-安装sass-loader之后运行运行 `npm run develop` 时报错如下：
-
-![安装sass-loader之后运行报错](t13-webpack项目构建工具/webpack010.png)
+安装sass-loader之后运行运行 `npm run develop` 时报错
 
 解决：
 
@@ -400,10 +372,6 @@ webpack 允许像加载任何代码一样加载 CSS。可以选择需要的方�
 ```
 
 针对上面的两种使用方式，loader 可以自动识别并处理。根据 loader 中的设置，webpack 会将小于指点大小的文件转化成 base64 格式的 dataUrl，其他图片会做适当的压缩并存放在指定目录中。
-
-这一步的目录如下：
-
-![目录结构](t13-webpack项目构建工具/webpack011.png)
 
 ---
 
@@ -477,9 +445,7 @@ webpack 允许像加载任何代码一样加载 CSS。可以选择需要的方�
   </html>
 ```
 
-注意：记住要把这些文件都加入到你的 HTML 代码中，但在上面这种引入后，在浏览器打开之后报下面这个错误，是因为引入顺序的问题
-
-![报错](t13-webpack项目构建工具/webpack012.png)
+注意：记住要把这些文件都加入到你的 HTML 代码中，但在上面这种引入后，在浏览器打开之后报错，是因为引入顺序的问题
 
 将上面 index.html 文件中的两个 js 文件引入顺序调换，如下
 
@@ -671,119 +637,6 @@ copy-webpack-plugin
 
 https://github.com/mdreizin/webpack-config
 
-### 最终的 webpack.publish.config.js 文件
-
-``` js
-  // webpack 的发布配置文件
-  var path = require('path');
-  var webpack = require('webpack');
-  // 自动生成index.html页面插件
-  var HtmlWebpackPlugin = require('html-webpack-plugin');
-  // 提取css文件的插件
-  var ExtractTextPlugin = require("extract-text-webpack-plugin");
-  // 删除文件夹
-  var CleanPlugin = require('clean-webpack-plugin');
-  module.exports = {
-      // 单页面 SPA 的入口文件
-      entry: {
-          app: path.resolve(__dirname,'src/js/app.js'),
-          // 当 react 作为一个 node  模块安装的时候，
-          // 可以直接指向它，就比如 require('react');
-          vendors: ['react', 'react-dom']
-      },
-      // 构建之后的文件输出位置配置
-      output: {
-          path: path.resolve(__dirname, 'dist'),
-          filename: 'bundle.js'
-      },
-      module: {
-          loaders: [
-              // JXS 和 ES6 语法转换为 ES5
-              {
-                  test: /\.jsx?$/, // 用正则来匹配文件路径，这段意思是匹配 js 或者 jsx
-                  loader: 'babel', // 加载模块 "babel" 是 "babel-loader" 的缩写
-                  query: {
-                      presets: ['es2015', 'react', 'stage-0', 'stage-1', 'stage-2', 'stage-3']
-                  }
-              },
-              // 可以在 js 中引用 css 的加载器
-              {
-                  test: /\.css$/,
-                  loader: ExtractTextPlugin.extract("style-loader", "css-loader") // 如果同时使用多个加载器，中间用 ! 连接，加载器的执行顺序是从右向左
-              },
-              // 可以在 js 中引用 sass 的加载器
-              {
-                  test: /\.scss$/,
-                  loader: ExtractTextPlugin.extract("style-loader", "css-loader!sass-loader")
-              },
-              // 处理图片
-              {
-                  test: /\.(png|jpg|gif|jpeg)$/,
-                  loader: 'url?limit=25000&name=images/[name].[ext]'
-              },
-              // 处理字体
-              {
-                  test: /\.(eot|woff|ttf|woff2|svg)$/,
-                  loader: 'url?limit=1000000&name=fonts/[name],[ext]'
-              }
-          ]
-      },
-      resolve: {
-          //查找module的话从这里开始查找
-          // root: '/pomy/github/flux-example/src', //绝对路径
-          //自动扩展文件后缀名，意味着我们 require 模块可以省略不写后缀名
-          //注意一下, extensions 第一个是空字符串! 对应不需要后缀的情况.
-          extensions: ['', '.js', '.json', '.sass', 'jsx'],
-          //模块别名定义，方便后续直接引用别名，无须多写长长的地址
-          // alias: {
-          //     AppStore : 'js/stores/AppStores.js',//后续直接 require('AppStore') 即可
-          //         ActionType : 'js/actions/ActionType.js',
-          //         AppAction : 'js/actions/AppAction.js'
-          // }
-      },
-      plugins: [
-          // 使用了该插件就不适用 gulp 了
-          new CleanPlugin(['dist']),
-          // 分离第三方应用插件,name属性会自动指向 entry 中 vendros 属性，filename 属性中的文件会自动构建到output中的path属性下面
-          new webpack.optimize.CommonsChunkPlugin({name: 'vendors', filename: 'vendors.js'}),
-          // 用webpack压缩代码，可以忽略代码中的警告
-          new webpack.optimize.UglifyJsPlugin({
-              compress: {
-                  warnings: false
-              }
-          }),
-          // 可以新建多个抽离样式的文件，这样就可以有多个css文件了。
-          new ExtractTextPlugin("app.css"),
-          new HtmlWebpackPlugin({
-              template: './src/template.html',
-              htmlWebpackPlugin: {
-                  "files": {
-                      "css": ["app.css"],
-                      "js": ["vendors.js", "bundle.js"]
-                  }
-              },
-              // 压缩 html 文档
-              minify: {
-                  removeComments: true,
-                  collapseWhitespace: true,
-                  removeAttributeQuotes: true
-              }
-          }),
-          // 优化第三方的包，减少代码量
-          new webpack.DefinePlugin({
-              //去掉react中的警告，react会自己判断
-              'process.env': {
-                  NODE_ENV: '"production"'
-              }
-          })
-      ]
-  };
-```
-
-最终的目录结构如下图：
-
-![目录结构](t13-webpack项目构建工具/webpack013.png)
-
 ---
 
 ## 开发阶段代码风格控制 eslint
@@ -801,50 +654,6 @@ https://github.com/mdreizin/webpack-config
         {test: /\.js$/, loader: "eslint-loader", exclude: /node_modules/}
     ],
   }
-```
-
-.eslintrc.js 文件
-
-``` js
-  module.exports = {
-      // 开启推荐配置信息
-      // "extends": "eslint:recommended",
-      // 默认情况下，ESLint 会在所有父级目录里寻找配置文件，一直到根目录。如果你想要你所有项目都遵循一个特定的约定时，这将会很有用，但有时候会导致意想不到的结果。为了将 ESLint 限制到一个特定的项目，在你项目根目录下的 package.json 文件或者 .eslintrc.* 文件里的 eslintConfig 字段下设置 "root": true。ESLint 一旦发现配置文件中有 "root": true，它就会停止在父级目录中寻找。
-      "root": true,
-      // 脚本在执行期间访问的额外的全局变量
-      // 当访问未定义的变量时，no-undef 规则将发出警告。如果你想在一个文件里使用全局变量，推荐你定义这些全局变量，这样 ESLint 就不会发出警告了。你可以使用注释或在配置文件中定义全局变量。
-      "globals" : {
-          "window":true,
-          "document":true,
-          "$":true
-      },
-      // 设置插件
-      // "plugins": [
-      //     'html'
-      // ],
-      // 设置解析器选项
-      "parserOptions": {
-          "ecmaVersion": 6,
-          "sourceType": "module",
-          "ecmaFeatures": {
-              "jsx": true
-          }
-      },
-      // 启用的规则及各自的错误级别
-      "rules" : {
-          // 禁止用console
-          "no-console":1,
-          // 禁止用分号
-          "semi":[1,'never'],
-          // 在同一个作用域中禁止多次重复定义
-          "no-redeclare":1
-      },
-      // 指定想启用的环境
-      "env": {
-          "browser": true,
-          "node": true
-      }
-  };
 ```
 
 ## 其它知识点
@@ -895,9 +704,7 @@ webpack 在构建包的时候会按目录的进行文件的查找，resolve 属�
     },
 ```
 
-这样用了 externals 属性时不用分离插件了，作用是这里引的插件不会被 webpack 所打包。要么用 cdn 要么需要 webpack 打包。下图为 webpack 中使用公用的 CDN:
-
-![webpack 中使用公用的 CDN](t13-webpack项目构建工具/webpack014.png)
+这样用了 externals 属性时不用分离插件了，作用是这里引的插件不会被 webpack 所打包。要么用 cdn 要么需要 webpack 打包。
 
 ### 开发环境中使用压缩文件
 
@@ -950,45 +757,3 @@ Node 和webpack 集成过程中遇到的坑如何解决：http://www.tuicool.com
 
 http://fakefish.github.io/react-webpack-cookbook/Hot-loading-components.html
 
-## 最后的 package.json
-
-``` json
-  {
-    "name": "webpack_example",
-    "version": "1.0.0",
-    "description": "CommonJS 和 AMD 是用于 JavaScript 模块管理的两大规范，前者定义的是模块的同步加载，主要用于 NodeJS ；而后者则是异步加载，通过 RequireJS 等工具适用于前端。随着 npm 成为主流的 JavaScript 组件发布平台，越来越多的前端项目也依赖于 npm 上的项目，或者自身就会发布到 npm 平台。因此，让前端项目更方便的使用 npm 上的资源成为一大需求。",
-    "main": "index.js",
-    "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1",
-      "develop": "webpack-dev-server --config webpack.develop.config.js --devtool eval --progress --colors --hot --content-base src",
-      "publish": "webpack --config webpack.publish.config.js"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "devDependencies": {
-      "babel-core": "^6.20.0",
-      "babel-loader": "^6.2.9",
-      "babel-preset-es2015": "^6.18.0",
-      "babel-preset-react": "^6.16.0",
-      "css-loader": "^0.26.1",
-      "eslint": "^3.12.0",
-      "eslint-loader": "^1.6.1",
-      "extract-text-webpack-plugin": "^1.0.1",
-      "file-loader": "^0.9.0",
-      "gulp": "^3.9.1",
-      "html-webpack-plugin": "^2.24.1",
-      "node-sass": "^4.0.0",
-      "open-browser-webpack-plugin": "0.0.3",
-      "sass-loader": "^4.0.2",
-      "style-loader": "^0.13.1",
-      "url-loader": "^0.5.7",
-      "webpack": "^1.14.0",
-      "webpack-dev-server": "^1.16.2"
-    },
-    "dependencies": {
-      "react": "^15.4.1",
-      "react-dom": "^15.4.1"
-    }
-  }
-```
